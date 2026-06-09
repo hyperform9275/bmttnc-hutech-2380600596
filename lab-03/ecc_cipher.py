@@ -1,7 +1,8 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
-from ui.ecc import Ui_MainWindow
+from ui.ecc_ui import Ui_MainWindow
 import requests
+
 
 class MyApp(QMainWindow):
     def __init__(self):
@@ -18,6 +19,7 @@ class MyApp(QMainWindow):
             response = requests.get(url)
             if response.status_code == 200:
                 data = response.json()
+
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Information)
                 msg.setText(data["message"])
@@ -25,19 +27,20 @@ class MyApp(QMainWindow):
             else:
                 print("Error while calling API")
         except requests.exceptions.RequestException as e:
-            print("Error: %s" % e.message)
+            print("Error: %s" % str(e))
 
     def call_api_sign(self):
         url = "http://127.0.0.1:5000/api/ecc/sign"
         payload = {
             "message": self.ui.txt_info.toPlainText(),
         }
+
         try:
             response = requests.post(url, json=payload)
             if response.status_code == 200:
                 data = response.json()
                 self.ui.txt_sign.setText(data["signature"])
-                
+
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Information)
                 msg.setText("Signed Successfully")
@@ -45,7 +48,7 @@ class MyApp(QMainWindow):
             else:
                 print("Error while calling API")
         except requests.exceptions.RequestException as e:
-            print("Error: %s" % e.message)
+            print("Error: %s" % str(e))
 
     def call_api_verify(self):
         url = "http://127.0.0.1:5000/api/ecc/verify"
@@ -53,24 +56,26 @@ class MyApp(QMainWindow):
             "message": self.ui.txt_info.toPlainText(),
             "signature": self.ui.txt_sign.toPlainText()
         }
+
         try:
             response = requests.post(url, json=payload)
             if response.status_code == 200:
                 data = response.json()
-                if (data["is_verified"]):
-                    msg = QMessageBox()
-                    msg.setIcon(QMessageBox.Information)
+
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Information)
+
+                if data["is_verified"]:
                     msg.setText("Verified Successfully")
-                    msg.exec_()
                 else:
-                    msg = QMessageBox()
-                    msg.setIcon(QMessageBox.Information)
                     msg.setText("Verified Fail")
-                    msg.exec_()
+
+                msg.exec_()
             else:
                 print("Error while calling API")
         except requests.exceptions.RequestException as e:
-            print("Error: %s" % e.message)
+            print("Error: %s" % str(e))
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
